@@ -103,6 +103,12 @@ interface SeenAPI {
 
     // ─── Reminders ────────────────────────────────────────────────────────────────
 
+    @GET("sync/reminders")
+    suspend fun syncReminder(
+        @Header("Authorization") token: String,
+        @Query("last_sync") updatedSince: String?= null
+    ): Response<LogResponse>
+
     // ─── Posts ────────────────────────────────────────────────────────────────
 
     @GET("posts")

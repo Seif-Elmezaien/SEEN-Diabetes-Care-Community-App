@@ -14,10 +14,10 @@ object ReverbManager {
     private var pusher: Pusher? = null
 
     fun connect(token: String) {
-        if (pusher != null) return
+        if (pusher != null) return  // already connected
 
         val authorizer = HttpAuthorizer(
-            "https://inquisitorial-elba-undistractedly.ngrok-free.dev/broadcasting/auth" // no /api
+            "https://ollie-wroth-tributarily.ngrok-free.dev/api/broadcasting/auth"
         ).apply {
             setHeaders(mapOf("Authorization" to token))
         }
@@ -45,10 +45,10 @@ object ReverbManager {
         conversationId: Int,
         onMessageReceived: (JSONObject) -> Unit
     ) {
+        // If already subscribed, just return
         try {
-            val channel = pusher?.subscribePrivate("private-chat.$conversationId")
+            val channel = pusher?.subscribe("chat.$conversationId")
             channel?.bind(".MessageSent") { event ->
-                android.util.Log.d("Reverb", "Event received: ${event.data}")
                 try {
                     val data = JSONObject(event.data)
                     onMessageReceived(data)
@@ -57,11 +57,16 @@ object ReverbManager {
                 }
             }
         } catch (e: IllegalArgumentException) {
-            android.util.Log.d("Reverb", "Already subscribed to private-chat.$conversationId")
+            android.util.Log.d("Reverb", "Already subscribed to chat.$conversationId")
         }
     }
 
     fun unsubscribe(conversationId: Int) {
-        pusher?.unsubscribe("private-chat.$conversationId")
+        pusher?.unsubscribe("chat.$conversationId")
+    }
+
+    fun disconnect() {
+        pusher?.disconnect()
+        pusher = null
     }
 }
